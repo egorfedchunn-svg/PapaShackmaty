@@ -1,0 +1,134 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#101014">
+<title>Папа, сыграем в шахматы?</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;min-height:100vh;display:grid;place-items:center;
+ padding:25px;background:
+ radial-gradient(ellipse at 50% 0%,#343027,transparent 48%),
+ linear-gradient(145deg,#0b0b0f,#14131a,#0b0b0f);
+ color:#f6f2eb;font-family:Georgia,serif
+}
+.page{width:min(760px,100%)}
+.top{text-align:center;color:#c8a978;font:10px Arial;
+ letter-spacing:4px;text-transform:uppercase;margin-bottom:20px}
+.card{
+ position:relative;overflow:hidden;text-align:center;
+ padding:clamp(28px,6vw,58px);
+ border:1px solid #66583f;border-radius:4px;
+ background:linear-gradient(145deg,#1f1e22,#111116);
+ box-shadow:0 28px 90px #0009
+}
+.chess{font-size:56px;color:#ead2a7;margin-bottom:22px}
+.eyebrow{color:#c8a978;font:10px Arial;letter-spacing:3px;margin-bottom:17px}
+h1{font-size:clamp(32px,7vw,54px);font-weight:400;line-height:1.12;margin:0}
+.subtitle{max-width:480px;margin:18px auto 0;color:#aaa4a0;
+ font:14px/1.8 Arial}
+.divider{width:76px;height:1px;margin:30px auto;
+ background:linear-gradient(90deg,transparent,#c8a978,transparent)}
+.question{color:#ead2a7;font:12px Arial;letter-spacing:1.5px;margin-bottom:18px}
+.answers{display:grid;grid-template-columns:repeat(2,1fr);gap:11px;max-width:520px;margin:auto}
+.answer{
+ min-height:52px;padding:13px 12px;border:1px solid #62553f;
+ border-radius:3px;color:#f6f2eb;background:#24232a;
+ font:14px Arial;transition:.2s
+}
+.answer:hover:not(:disabled){background:#3b3327;border-color:#ead2a7;transform:translateY(-2px)}
+.answer.primary{background:#ead2a7;color:#17130e;font-weight:bold}
+.answer.primary:hover:not(:disabled){background:#f3dfba}
+.answer:disabled{opacity:.55;cursor:wait}
+#status{min-height:25px;margin:17px auto 0;color:#aaa4a0;font:12px/1.6 Arial}
+#status.success{color:#91c7a4}
+#status.error{color:#d78a8a}
+.footer{text-align:center;margin-top:18px;color:#77717a;font:10px Arial;letter-spacing:1px}
+.footer span{color:#c8a978}
+@media(max-width:480px){.answers{grid-template-columns:1fr}.card{padding:30px 19px}}
+</style>
+</head>
+<body>
+<main class="page">
+ <div class="top">A small invitation · just for you</div>
+ <section class="card">
+  <div class="chess">♞</div>
+  <div class="eyebrow">ONE GAME · ONE EVENING · TOGETHER</div>
+  <h1>Папа, поиграем<br>в шахматы?</h1>
+  <p class="subtitle">
+   Предлагаю небольшую шахматную партию.
+   Выбирай ответ — я получу его и буду знать,
+   когда готовить доску. ♟
+  </p>
+  <div class="divider"></div>
+  <p class="question">ТВОЙ ОТВЕТ</p>
+  <div class="answers" id="answers">
+   <button class="answer primary" data-answer="Да">Да ♟</button>
+   <button class="answer" data-answer="Yes">Yes</button>
+   <button class="answer" data-answer="Maybe">Maybe</button>
+   <button class="answer" data-answer="Конечно">Конечно!</button>
+   <button class="answer" data-answer="Может быть через часик">Может быть через часик</button>
+   <button class="answer" data-answer="Нет">Нет</button>
+  </div>
+  <div id="status" role="status" aria-live="polite"></div>
+ </section>
+ <div class="footer">MADE WITH ♡ · <span>CHECKMATE?</span></div>
+</main>
+
+<script>
+const recipient = "egorfedchunn@gmail.com";
+const endpoint = "https://formsubmit.co/ajax/" + recipient;
+
+const buttons = document.querySelectorAll(".answer");
+const statusBox = document.getElementById("status");
+
+buttons.forEach(button => {
+ button.addEventListener("click", async () => {
+  const answer = button.dataset.answer;
+
+  buttons.forEach(item => item.disabled = true);
+  statusBox.className = "";
+  statusBox.textContent = "Отправляю ответ...";
+
+  const time = new Date().toLocaleString("ru-RU", {
+   dateStyle:"long",timeStyle:"short"
+  });
+
+  try {
+   const response = await fetch(endpoint, {
+    method:"POST",
+    headers:{
+     "Content-Type":"application/json",
+     "Accept":"application/json"
+    },
+    body:JSON.stringify({
+     name:"Ответ папы",
+     _subject:"Папа ответил на шахматное приглашение",
+     message:"Ответ: "+answer+"\nВремя: "+time
+    })
+   });
+
+   const data = await response.json();
+
+   if(!response.ok || data.success===false ||
+      data.success==="false"){
+    throw new Error("Не удалось отправить ответ");
+   }
+
+   statusBox.className = "success";
+   statusBox.textContent = "Ответ отправлен! Спасибо, папа ❤️";
+
+  } catch(error) {
+   statusBox.className = "error";
+   statusBox.textContent =
+    "Не получилось отправить. Попробуй ещё раз.";
+   buttons.forEach(item => item.disabled = false);
+  }
+ });
+});
+</script>
+</body>
+</html>
